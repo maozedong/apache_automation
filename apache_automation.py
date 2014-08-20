@@ -5,6 +5,7 @@ from pprint import pprint
 import os.path
 import subprocess
 import platform
+import re
 
 __author__ = 'ostap'
 
@@ -16,6 +17,8 @@ def execute(command):
         print('ERROR: can\'t execute ' + command + '. Error code ' + str(p.returncode))
         print(err)
         exit()
+    return out
+
 
 def setConfig():
     pprint('NOT IMPLEMENTED')
@@ -85,7 +88,7 @@ def getConfig():
 
 def getVhost(path):
     if os.path.isfile(path) is not True:
-        pprint('ERROR: no vhost.conf file. Exiting...')
+        pprint('ERROR: no ' + path + ' file. Exiting...')
         exit()
     f = open(path)
     vhost = f.read()
@@ -142,9 +145,19 @@ def getWebroot():
         webroot += '/'
     return webroot
 
+
+def getApacheConfExtension(apache):
+    extension = ''
+    out = execute(apache + ' -v')
+    m = re.search(' Apache/\d\.(\d)\.\d ', out)
+    if m.group(1) >= 4:
+        extension = '.conf'
+    return extension
+
 if os.geteuid() != 0:
     exit("Please, run script with root privileges. Try sudo")
 config = getConfig()
+apacheExt = getApacheConfExtension(config['apache'])
 vhost = getVhost(config['vhost_file'])
 webroot = getWebroot()
 sitename = raw_input('Enter site name: ')
@@ -153,7 +166,7 @@ sitename = raw_input('Enter site name: ')
 print('Great! Configuring...')
 execute("chmod 777 -R " + webroot)
 vhcontent = getVhContent(vhost, webroot, sitename)
-createVhostFile(config['apache-root'] + 'sites-available/' + sitename + '.conf', vhcontent)
+createVhostFile(config['apache-root'] + 'sites-available/' + sitename + apacheExt, vhcontent)
 execute('a2ensite ' + sitename)
 execute('service ' + config['apache'] + ' restart')
 if hostExists(sitename) is False:
@@ -169,7 +182,7 @@ with open(os.devnull, "w") as f:
     res = subprocess.call('which gedit', shell=True, stdout=f, stderr=f)
 if res == 0:
     with open(os.devnull, "w") as f:
-        subprocess.call('nohup gedit ' + config['apache-root'] + 'sites-available/' + sitename + '.conf &', shell=True, stdout=f, stderr=f)
+        subprocess.call('nohup gedit ' + config['apache-root'] + 'sites-available/' + sitename + apacheExt + ' &', shell=True,
+                        stdout=f, stderr=f)
 else:
-    with open(os.devnull, "w") as f:
-        subprocess.call('nano ' + config['apache-root'] + 'sites-available/' + sitename + '.conf &', shell=True, stdout=f, stderr=f)
+    subprocess.call('nano ' + config['apache-root'] + 'sites-available/' + sitename + apacheExt, shell=True)
