@@ -1,0 +1,38 @@
+{
+        "RedHat":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "httpd",
+        "apache-root":"/etc/httpd/"
+    },
+        "CentOS":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "httpd",
+        "apache-root":"/etc/httpd/"
+    },
+        "Fedora":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "httpd",
+        "apache-root":"/etc/httpd/"
+    },
+        "Debian":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "apache2",
+        "apache-root":"/etc/apache2/"
+    },
+        "Ubuntu":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "apache2",
+        "apache-root":"/etc/apache2/"
+    },
+        "FreeBSD":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "httpd",
+        "apache-root":"/usr/local/etc/apache22/"
+    }
+}
