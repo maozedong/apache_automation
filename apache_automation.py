@@ -8,6 +8,15 @@ import platform
 
 __author__ = 'ostap'
 
+
+def execute(command):
+    p = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+    out, err = p.communicate()
+    if p.returncode != 0:
+        print('ERROR: can\'t execute ' + command + '. Error code ' + str(p.returncode))
+        print(err)
+        exit()
+
 def setConfig():
     pprint('NOT IMPLEMENTED')
     exit()
@@ -60,13 +69,6 @@ def getVhContent(vhost, documentroot, servername):
 
 
 def hostExists(hostname):
-    """ str -> bool
-    The exists function opens the host file and checks to see if the hostname requested exists in the host file.
-    It opens the host file, reads the lines, and then a for loop checks each line to see if the hostname is in it.
-    If it is, True is returned. If not, False is returned.
-    :param hostname:
-    :return:
-    """
     if 'linux' in sys.platform:
         filename = '/etc/hosts'
     else:
@@ -81,11 +83,6 @@ def hostExists(hostname):
 
 
 def updateHost(ipaddress, hostname):
-    """
-    The update function takes the ip address and hostname passed into the function and adds it to the host file.
-    :param ipaddress:
-    :param hostname:
-    """
     if 'linux' in sys.platform:
         filename = '/etc/hosts'
     else:
@@ -105,7 +102,7 @@ def getWebroot():
     return webroot
 
 if os.geteuid() != 0:
-    exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
+    exit("Please, run script with root privileges. Try sudo")
 config = getConfig()
 vhost = getVhost(config['vhost_file'])
 webroot = getWebroot()
@@ -113,28 +110,11 @@ sitename = raw_input('Enter site name: ')
 # webroot = '/var/www/apache_automation_test/web/'
 # sitename = 'apache_automation_test.local'
 print('Great! Configuring...')
-
-with open(os.devnull, "w") as f:
-    res = subprocess.call("chmod 777 -R " + webroot, shell=True, stdout=f, stderr=f)
-if res != 0:
-    print('ERROR: can\'t execute chmod 777 -R ' + webroot + '. Exiting...')
-    exit()
-
+execute("chmod 777 -R " + webroot)
 vhcontent = getVhContent(vhost, webroot, sitename)
 createVhostFile(config['apache-root'] + 'sites-available/' + sitename + '.conf', vhcontent)
-
-with open(os.devnull, "w") as f:
-    res = subprocess.call('a2ensite ' + sitename, shell=True, stdout=f, stderr=f)
-if res != 0:
-    print('ERROR: can\'t execute a2ensite ' + sitename + '. Exiting...')
-    exit()
-
-with open(os.devnull, "w") as f:
-    res = subprocess.call('service ' + config['apache'] + ' restart', shell=True, stdout=f, stderr=f)
-if res != 0:
-    print('ERROR: can\'t execute service ' + config['apache'] + ' restart. Exiting...')
-    exit()
-
+execute('a2ensite ' + sitename)
+execute('service ' + config['apache'] + ' restart')
 if hostExists(sitename) is False:
     updateHost('127.0.0.1', sitename)
 else:
