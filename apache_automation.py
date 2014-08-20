@@ -82,8 +82,6 @@ def getConfig():
         json_data.close()
     return config
 
-getConfig()
-exit()
 
 def getVhost(path):
     if os.path.isfile(path) is not True:
