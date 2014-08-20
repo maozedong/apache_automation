@@ -1,6 +1,7 @@
 This script automates apache vhosts local configuration for linux distributions
 
-Feel free to customize config.json file :)
+after the first run config.json file will appear.
+Feel free to customize it :)
 
 Usage: 
     sudo python apache_automation.py

@@ -31,16 +31,59 @@ def linux_distribution():
 
 
 def getConfig():
+    confstr = '''{
+        "RedHat":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "httpd",
+        "apache-root":"/etc/httpd/"
+    },
+        "CentOS":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "httpd",
+        "apache-root":"/etc/httpd/"
+    },
+        "Fedora":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "httpd",
+        "apache-root":"/etc/httpd/"
+    },
+        "Debian":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "apache2",
+        "apache-root":"/etc/apache2/"
+    },
+        "Ubuntu":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "apache2",
+        "apache-root":"/etc/apache2/"
+    },
+        "FreeBSD":
+    {
+        "vhost_file":"vhost.conf",
+        "apache": "httpd",
+        "apache-root":"/usr/local/etc/apache22/"
+    }
+}'''
     config_file = 'config.json'
     if os.path.isfile(config_file) is not True:
-        print('ERROR: config.json file not found. Exitting...')
-        exit()
-    json_data = open(config_file)
-    config = json.load(json_data)
-    json_data.close()
-    distro = linux_distribution()[0]
-    return config[distro]
+        distro = linux_distribution()[0]
+        config = json.loads(confstr)[distro]
+        file = open(config_file, "w")
+        json.dump(obj=config, fp=file, sort_keys=True, indent=4)
+        file.close()
+    else:
+        json_data = open(config_file)
+        config = json.load(json_data)
+        json_data.close()
+    return config
 
+getConfig()
+exit()
 
 def getVhost(path):
     if os.path.isfile(path) is not True:
